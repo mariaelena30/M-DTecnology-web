@@ -1,8 +1,7 @@
 {
 "name": "mdsolutions-web",
 "version": "1.0.0",
-"description": "M&D Solutions Technology
-- Páginas web y reservas para hoteles",
+"description": "M&D Solutions Technology- Páginas web y reservas para hoteles",
 "scripts": {
 "dev": "next dev",
 "build": "next build",
