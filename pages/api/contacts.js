@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         sender: { name: name, email: email },
-        to: [{ email: process.env.ADMIN_EMAIL || 'mdsolutionstecnology@gmail.com', name: 'M&D Solutions' }],
+        to: [{ email: process.env.ADMIN_EMAIL, name: 'M&D Solutions' }],
         subject: `Nuevo mensaje de contacto de ${name}`,
         htmlContent: `<p><strong>Nombre:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Mensaje:</strong> ${message}</p>`,
       }),
