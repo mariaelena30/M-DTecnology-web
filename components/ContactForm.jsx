@@ -1,85 +1,61 @@
-import { useState } from 'react';
+// pages/api/contacts.js
+// Guarda cada contacto en Firestore Y sigue mandando el aviso por email vía Brevo.
+// Si Firestore fallara por algún motivo, el email igual se intenta enviar:
+// no queremos perder el aviso por un problema de guardado.
 
-export default function ContactForm() {
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  const [status, setStatus] = useState({ loading: false, success: null, error: null });
+import admin, { db } from '../../lib/firebaseAdmin';
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Método no permitido' });
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setStatus({ loading: true, success: null, error: null });
+  const { name, email, message } = req.body;
 
-    try {
-      const res = await fetch('/api/contacts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+  if (!name || !email || !message) {
+    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
 
-      const data = await res.json();
+  // 1. Guardar en Firestore (no bloqueante: si falla, seguimos con el email igual)
+  let contactId = null;
+  try {
+    const docRef = await db.collection('contacts').add({
+      name,
+      email,
+      message,
+      status: 'pendiente', // podés cambiarlo a "contactado" desde el panel más adelante
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    contactId = docRef.id;
+  } catch (dbError) {
+    console.error('Error guardando el contacto en Firestore:', dbError);
+  }
 
-      if (res.ok) {
-        setStatus({ loading: false, success: '¡Mensaje enviado con éxito!', error: null });
-        setFormData({ name: '', email: '', message: '' });
-      } else {
-        setStatus({ loading: false, success: null, error: data.message || 'Error al enviar' });
-      }
-    } catch (err) {
-      setStatus({ loading: false, success: null, error: 'Ocurrió un error inesperado' });
+  // 2. Enviar el email vía Brevo (igual que antes)
+  try {
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+      },
+      body: JSON.stringify({
+        sender: { name: name, email: email },
+        to: [{ email: process.env.ADMIN_EMAIL, name: 'M&D Solutions' }],
+        subject: `Nuevo mensaje de contacto de ${name}`,
+        htmlContent: `<p><strong>Nombre:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Mensaje:</strong> ${message}</p>`,
+      }),
+    });
+
+    if (response.ok) {
+      return res.status(200).json({ success: true, message: 'Mensaje enviado con éxito', contactId });
+    } else {
+      const errorData = await response.json();
+      // El contacto ya quedó guardado en Firestore aunque el email fallara
+      return res.status(400).json({ success: false, error: errorData, contactId });
     }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-4 flex flex-col gap-4">
-      <div>
-        <label className="block text-sm font-medium mb-1 text-gray-700">Nombre</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border border-gray-300 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1 text-gray-700">Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border border-gray-300 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1 text-gray-700">Mensaje</label>
-        <textarea
-          name="message"
-          rows="4"
-          value={formData.message}
-          onChange={handleChange}
-          required
-          className="w-full p-2 border border-gray-300 rounded text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-        ></textarea>
-      </div>
-
-      <button
-        type="submit"
-        disabled={status.loading}
-        className="bg-blue-600 text-white font-semibold py-2 px-4 rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
-      >
-        {status.loading ? 'Enviando...' : 'Enviar Mensaje'}
-      </button>
-
-      {status.success && <p className="text-green-600 font-medium mt-2">{status.success}</p>}
-      {status.error && <p className="text-red-600 font-medium mt-2">{status.error}</p>}
-    </form>
-  );
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Error interno del servidor', error: error.message, contactId });
+  }
 }
