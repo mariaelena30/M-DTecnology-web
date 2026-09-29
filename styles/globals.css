@@ -10,7 +10,7 @@
 
 html,
 body {
-  background: linear-gradient(to br, #0f172a, #1a3a8a, #f172a);
+  background: linear-gradient(to bottom right, #0f172a, #1a3a8a, #0f172a);
   color: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
