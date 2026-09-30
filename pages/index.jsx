@@ -795,7 +795,8 @@ export default function Home() {
                 <p className="text-sm text-[#25d6e8]">📞 Daniel: <span className="text-white font-mono">+34 647 56 47 33</span></p>
                 <p className="text-sm text-[#c5f34c]">📞 María Elena: <span className="text-white font-mono">+34 362 53 91 283</span></p>
                 <p className="text-sm text-[#ff765e]">
-                  ✉️ Email: <a href={displayEmail ? `mailto:${displayEmail}` : '#'} className="text-white font-mono hover:underline">{displayEmail || 'Cargando...'}</a>
+                  ✉️ Email: <a href="mailto:mdsolutionstecnology@gmail.com" className="text-white font-mono hover:underline">mdsolutionstecnology@gmail.com</a>
+
                 </p>
               </div>
             </div>
