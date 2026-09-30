@@ -32,14 +32,7 @@ export default function Home() {
   const [reviewsList, setReviewsList] = useState([]);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState('');
 
-  // 7. Ofuscación de Email para pasar el escáner de Netlify
-  const [displayEmail, setDisplayEmail] = useState('');
-
-  useEffect(() => {
-    const user = 'mdsolutionstecnology';
-    const domain = 'gmail.com';
-    setDisplayEmail(`${user}@${domain}`);
-  }, []);
+  
 
   // 8. Formulario de Contacto
   const [formData, setFormData] = useState({
