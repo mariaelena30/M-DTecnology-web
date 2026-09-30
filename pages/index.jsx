@@ -902,7 +902,8 @@ export default function Home() {
           <div>
             <p className="font-bold text-white">M&D Solutions Technology</p>
             <p className="text-xs text-[#a9b5c3] mt-1">
-              Atención directa: Daniel (+34 647 56 47 33) | María Elena (+34 362 53 91 283) · Email: {displayEmail || 'mdsolutionstecnology@gmail.com'}
+              Atención directa: Daniel (+34 647 56 47 33) | María Elena (+34 362 53 91 283) · Email: mdsolutionstecnology@gmail.com
+
             </p>
             <p className="text-xs text-[#a9b5c3] mt-1">Soluciones informáticas y gestión integral para el sector hotelero.</p>
           </div>
